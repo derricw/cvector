@@ -1,6 +1,8 @@
 #include<stdio.h>
 #include<stdlib.h>
 
+int SUCCESS = 1;
+int FAILURE = 0;
 
 typedef struct {
   size_t size;
@@ -54,6 +56,27 @@ void vinsert(vector *a, int item, int index) {
 	}
 }
 
+void vdelete(vector *a, int index) {
+	for (int i=index; i <= a->used; i++) {
+		a->data[i] = a->data[i+1];
+	}
+	a->data[a->used] = 0;
+	a->used--;
+}
+
+int vpop(vector *a, int *success) {
+	int ret;
+	if (a->used > 0) {
+		*success = SUCCESS;
+		ret = a->data[a->used-1];
+		vdelete(a, a->used-1);
+	} else {
+		*success = FAILURE;
+		ret = 0;
+	}
+	return ret;
+}
+
 void vfree(vector *a) {
   free(a->data);
   a->data = NULL;
@@ -63,8 +86,12 @@ void vfree(vector *a) {
 
 
 int main(int argc, char *argv[]) {
-  vector v;
+  int ret;
+	int success;
+	vector v;
   vinit(&v, 2);
+	ret = vpop(&v, &success);
+	printf("pop empty: %i, success: %i\n", ret, success);
   for (int i=0; i<100; i++) {
     vappend(&v, i);
   }
@@ -72,6 +99,11 @@ int main(int argc, char *argv[]) {
   vinsert(&v, 5, 100);
   vinsert(&v, 5, 0);
 	vinsert(&v, 1238098, 5);
+	vprint(&v);
+	vdelete(&v, 3);
+	vprint(&v);
+	ret = vpop(&v, &success);
+	printf("popped: %i\n", ret);
 	vprint(&v);
 	vfree(&v);
 }
